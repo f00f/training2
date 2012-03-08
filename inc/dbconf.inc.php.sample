@@ -1,0 +1,24 @@
+<?php
+// enter your database login information below
+// and rename this file to dbconf.inc.php
+
+// productive environment
+$dbHost	= 'yourdbhost';
+$dbDB	= 'yourdb';
+$dbUser	= 'yourdbuser';
+$dbPass	= 'yourpass';
+
+// you may use a different setup for your test environment
+// make sure that ON_TEST_SERVER is set correctly (in lib2.inc.php)
+if (@ON_TEST_SERVER)
+	{
+	$dbHost = 'yourdbhost'; // probably 'localhost'
+	$dbDB	= 'yourdb';
+	$dbUser	= 'yourdbuser';
+	$dbPass	= 'yourpass';
+	}
+
+// don't change anything below this line
+$table1	= 'training_ba';
+$table2	= 'training2';
+?>
