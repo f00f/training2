@@ -7,7 +7,9 @@ function importV1Data($verbose = false) {
 	//$sql = "TRUNCATE `{$table}`";
 	//$result = DbQuery($sql);
 
-	print "Fetching latest imported practice session from new DB.\n";
+	if ($verbose) {
+		print "Fetching latest imported practice session from new DB.\n";
+	}
 	$latest_session = 0;
 	$sql = "SELECT MAX(`when`) AS 'LATEST_SESSION' FROM `{$table}`";
 	$result = DbQuery($sql);
@@ -16,7 +18,9 @@ function importV1Data($verbose = false) {
 		$row = mysql_fetch_assoc($result);
 		$latest_session = $row['LATEST_SESSION'];
 	}
-	print "  Latest session: {$latest_session}.\n";
+	if ($verbose) {
+		print "  Latest session: {$latest_session}.\n";
+	}
 	//$date = new DateTime("{$latest_session}");
 	//$latest_session = $date->format('U');
 	//print "  Latest session: {$latest_session}.\n";
@@ -29,7 +33,9 @@ function importV1Data($verbose = false) {
 	do {
 		if ($i++ > 2) break;
 
-		print "Fetching next batch of practice sessions.\n";
+		if ($verbose) {
+			print "Fetching next batch of practice sessions.\n";
+		}
 		$sql = "SELECT * FROM `{$importTableV1}` WHERE `when` > '{$latest_session}' ORDER BY `when` ASC LIMIT 50";
 		//print "------\n{$sql}\n\n";
 		$result = DbQuery($sql);
@@ -39,7 +45,9 @@ function importV1Data($verbose = false) {
 		if (0 < mysql_num_rows($result)) {
 			$more = true;
 		}
-		print "  found ".mysql_num_rows($result). " entries.\n";
+		if ($verbose) {
+			print "  found ".mysql_num_rows($result). " entries.\n";
+		}
 
 		$buffer = array();
 		while ($row = @mysql_fetch_assoc($result)) {
@@ -50,9 +58,13 @@ function importV1Data($verbose = false) {
 			if ('RESET' == $row['name']) {
 				$latest_session = $row['when'];
 				$date = new DateTime("@{$latest_session}");
-				print "Adding ".count($buffer)." lines.\n";
+				if ($verbose) {
+					print "Adding ".count($buffer)." lines.\n";
+				}
 				foreach ($buffer as $row) {
-					print "Inserting {$row['name']}\n";
+					if ($verbose) {
+						print "Inserting {$row['name']}\n";
+					}
 					$sql = "REPLACE INTO `{$table}` "
 							."(`club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host`) "
 							."VALUES "
@@ -65,7 +77,9 @@ function importV1Data($verbose = false) {
 			}
 		}
 		unset($buffer);
-		print "  Latest session: {$latest_session}.\n";
+		if ($verbose) {
+			print "  Latest session: {$latest_session}.\n";
+		}
 	} while ($more);
 }
 ?>
