@@ -18,7 +18,9 @@ if (@ON_TEST_SERVER)
 	$dbPass	= 'yourpass';
 	}
 
+// settings for data import from version 1
+$importTableV1 = 'training_foo';
+$importClubId = 'foo';
 // don't change anything below this line
-$table1	= 'training_ba';
-$table2	= 'training2';
+$table	= 'training2';
 ?>
