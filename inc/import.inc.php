@@ -58,6 +58,7 @@ function importV1Data($verbose = false) {
 			if ('RESET' == $row['name']) {
 				$latest_session = $row['when'];
 				$date = new DateTime("@{$latest_session}");
+				$dtfmt = $date->format('Y-m-d H:i:s');
 				if ($verbose) {
 					print "Adding ".count($buffer)." lines.\n";
 				}
@@ -65,10 +66,12 @@ function importV1Data($verbose = false) {
 					if ($verbose) {
 						print "Inserting {$row['name']}\n";
 					}
+					$dt2 = new DateTime("@{$row['when']}");
+					$when_dt = $dt2->format('Y-m-d H:i:s');
 					$sql = "REPLACE INTO `{$table}` "
-							."(`club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host`) "
+							."(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
 							."VALUES "
-							."('{$importClubId}', '".$date->format('Y-m-d H:i:s')."', '{$row['name']}', '{$row['text']}', {$row['when']}, '{$row['status']}', '{$row['ip']}', '{$row['host']}')";
+							."('{$importClubId}', '".$dtfmt."', '{$row['name']}', '{$row['text']}', {$row['when']}, '{$when_dt}', '{$row['status']}', '{$row['ip']}', '{$row['host']}')";
 					//print "------\n{$sql}\n\n";
 					$result = DbQuery($sql);
 				}
