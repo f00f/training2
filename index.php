@@ -16,21 +16,18 @@ importV1Data();
 // find next practice and enter into DB.
 $nP = Practice::findNext($club_id);
 
-// detect which practice to display
+// decide which practice to display
 $pid = 0;
 if (@$_REQUEST['p']) {
-	$pid = (int) $_REQUEST['p'];
+	$pid = $_REQUEST['p'];
 	if (! Practice::isValidID($club_id, $pid)) {
 		$pid = 0;
 	}
 }
-if (!$pid) {
-	// find max TID in DB which is smaller than time() - 120 Min
-}
 
 $p = new Practice($club_id, $pid);
 
-# disconnect from db
+# disconnect from db, only output follows
 mysql_close();
 
 html_header();
