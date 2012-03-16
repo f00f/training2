@@ -62,25 +62,6 @@ class Practice {
 		}
 	}
 
-	// Store data of next practices in DB
-	static function storeNext($cid) {
-		global $table;
-
-		$cid = mysql_real_escape_string($cid);
-		// TODO: create one big query
-		foreach(self::$next as $p) {
-			$text = serialize($p);
-			$when = $p['when'];
-			$date = new DateTime("@{$when}");
-			$pid = $date->format('Y-m-d H:i:s');
-			$q = "REPLACE INTO `{$table}` "
-				. "(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
-				. "VALUES "
-				. "('{$cid}', '{$pid}', 'RESET', '{$text}', '{$when}', '{$pid}', '', '', '')";
-			mysql_query($q);
-		}
-	}
-
 	// find list of practices for next week
 	static function findNext($cid) {
 		if (! self::$next) {
@@ -125,13 +106,25 @@ class Practice {
 
 					$nextTraining['practice_id'] = date('Y-m-d H:i:s', $nextTraining['when']);
 
-					self::$next[] = $nextTraining;
+					$nextPractice = new Practice($cid, $nextTraining['practice_id']);
+					if (!$nextPractice->wtag) { // was not in db, yet
+						// fill object
+						$nextPractice->wtag    = $trainingDates[$weekday]['tag'];
+						$nextPractice->datum   = strtotime('+ '.$daysLeft.'days');
+						$nextPractice->zeit    = $trainingDates[$weekday]['zeit'];
+						$nextPractice->ort     = $trainingDates[$weekday]['ort'];
+						$nextPractice->anreise = $trainingDates[$weekday]['anreise'];
+						$nextPractice->when    = mktime($ntHour, $ntMin, 0, $ntMon, $ntDay, $ntYear);
+
+						// store object
+						$nextPractice->store();
+					}
+
+					self::$next[] = $nextPractice;
 				}
 				$weekday = ++$weekday % 7;
 				++$daysLeft;
 			}
-
-			self::storeNext($cid);
 		}
 
 		return self::$next[0];
@@ -153,7 +146,7 @@ class Practice {
 				."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$this->club_id}' AND `name` = 'RESET'";
 			$res = DbQuery($q);
 			if (0 == mysql_num_rows($res)) {
-				die('Err0r!');
+				die("Err0r (c'tor)!");
 			}
 			$row = mysql_fetch_assoc($res);
 			$pid = $row['pid'];
@@ -169,22 +162,45 @@ class Practice {
 		global $int2Tag;
 
 		// load info about practice
-		$q = "SELECT * FROM `{$table}` "
+		$q = "SELECT `text` FROM `{$table}` "
 			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}'";
 		$res = DbQuery($q);
 		if (0 == mysql_num_rows($res)) {
-			die('Err0r!');
+			//die("Err0r! loadData({$this->club_id}, {$this->practice_id})");
+			return false;
 		}
 		$row = mysql_fetch_assoc($res);
-		$this->when = $row['when'];
-		$this->wtag = $int2Tag[ date('N', $this->when) ];
-		$this->datum = date('d.m.Y', $this->when);
-		$this->begin = date('H:i', $this->when);
+		$p = unserialize($row['text']);
+		$this->wtag  = $p->wtag;
+		$this->when  = $p->when;
+		$this->datum = $p->datum;
+		$this->ort   = $p->ort;
+		$this->zeit  = $p->zeit;
+		$this->begin = $p->begin;
+		$this->end   = $p->end;
+		$this->club_id = $p->club_id;
+		$this->practice_id = $p->practice_id;
 
 		// TODO: load info about players
 		//$this->zusagend = array();
 		//$this->absagend = array();
 		//$this->nixsagend = array();
+
+		return true;
+	}
+
+	function store() {
+		global $table;
+
+		// TODO: zugesagt etc. should not be stored in the DB.
+		//       but maybe their counts!
+		$text = serialize($this);
+		$q = "REPLACE INTO `{$table}` "
+			. "(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
+			. "VALUES "
+			. "('{$this->club_id}', '{$this->practice_id}', 'RESET', '{$text}', '{$this->when}', '{$this->practice_id}', '', '', '')";
+		mysql_query($q);
+		//if (mysql_error()) { print mysql_error(); }
 	}
 
 	function display() {
@@ -199,7 +215,7 @@ class Practice {
 		// information about the players
 		// ...
 		?>
-		Das nächste Training ist am <strong><?php print $this->wtag.', '.$this->datum ?>
+		Das nächste Training ist am <strong><?php print $this->wtag.', '.date('d.m.Y', $this->datum) ?>
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
@@ -216,11 +232,11 @@ class Practice {
 		//       (this might coincide, but doesn't have to)
 		print '<ul>';
 		foreach(self::$next as $p) {
-			$wtag = $p['wtag'];
-			$datum = date('d.m.', $p['datum']);
-			list($begin, $end) = explode(' - ', $p['zeit']);
-			$ort = $p['ort'];
-			$plink_id = preg_replace('/[^0-9]/', '', $p['practice_id']);
+			$wtag = $p->wtag;
+			$datum = date('d.m.Y', $p->datum);
+			list($begin, $end) = explode(' - ', $p->zeit);
+			$ort = $p->ort;
+			$plink_id = preg_replace('/[^0-9]/', '', $p->practice_id);
 			$view_link = '?p='.$plink_id;
 			// TODO: add player name to links
 			$yes_link = $view_link.'&amp;zusage=1';
