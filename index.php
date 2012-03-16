@@ -33,5 +33,12 @@ mysql_close();
 html_header();
 // display practice
 $p->display();
+$einteilungs_link = '';
+print '<h3>Siehe auch</h3>';
+print '<ul>';
+print '<li><a href="./">Zum aktuellen Training</a> (nur, wenn nicht das aktuelle angezeigt wird)</li>';
+print '<li><a href="'.$einteilungs_link.'">Einteilung ansehen</a> (Link hinzu)</li>';
+print '<li>Aktualisieren: Einfach Seite neu laden</li>';
+print '</ul>';
 html_footer();
 ?>
