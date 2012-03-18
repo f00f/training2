@@ -22,6 +22,7 @@ class Practice {
 	var $begin = '';
 	var $end = '';
 	var $ort = '';
+	var $userStatus = '';
 	
 	var $zusagend = array();
 	var $absagend = array();
@@ -181,12 +182,50 @@ class Practice {
 		$this->club_id = $p->club_id;
 		$this->practice_id = $p->practice_id;
 
-		// TODO: load info about players
-		//$this->zusagend = array();
-		//$this->absagend = array();
-		//$this->nixsagend = array();
+		$this->loadUserStatus();
 
 		return true;
+	}
+
+	// load info about current user
+	function loadUserStatus() {
+		global $table;
+		global $playername;
+		$q = "SELECT `status` FROM `{$table}` "
+			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}' "
+			."AND `name` = '{$playername}' "
+			."ORDER BY `when` DESC "
+			."LIMIT 1";
+		$res = DbQuery($q);
+		$this->userStatus = 'nix';
+		if (mysql_num_rows($res) > 0) {
+			$row = mysql_fetch_assoc($res);
+			$this->userStatus = $row['status'];
+		}
+	}
+
+	// load info about players
+	function loadPlayersDetails() {
+		global $table;
+		$q = "SELECT `name`, `text`, `status` FROM `{$table}` "
+			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}' "
+			."AND `name` != 'RESET' "
+			."ORDER BY `when` DESC";
+		$res = DbQuery($q);
+		$hatwasgesagt = array();
+		while ($row = mysql_fetch_assoc($res)) {
+			$name = strtolower($row['name']);
+			if (isset($hatwasgesagt[ $name ])) {
+				continue;
+			}
+			if ('ja' == $row['status']) {
+				$this->zusagend[] = $row['text'];
+			}
+			if ('nein' == $row['status']) {
+				$this->absagend[] = $row['text'];
+			}
+			$hatwasgesagt[ $name ] = true;
+		}
 	}
 
 	function store() {

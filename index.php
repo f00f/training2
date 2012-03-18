@@ -5,6 +5,7 @@ require_once './inc/import.inc.php';
 
 // DBG
 $club_id = 'ba';
+$playername = 'dummyplayer';
 
 # connect to db
 mysql_connect($dbHost, $dbUser, $dbPass);
@@ -26,6 +27,7 @@ if (@$_REQUEST['p']) {
 }
 
 $p = new Practice($club_id, $pid);
+$p->loadPlayersDetails();
 
 # disconnect from db, only output follows
 mysql_close();
