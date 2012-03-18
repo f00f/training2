@@ -243,6 +243,8 @@ class Practice {
 	}
 
 	function display() {
+		global $playername;
+
 		// information about the practice
 		// TODO: and NOT about the upcoming one
 		//       (this might coincide, but doesn't have to)
@@ -253,18 +255,58 @@ class Practice {
 
 		// information about the players
 		// ...
+		$anzZu = count($this->zusagend);
+		$anzAb = count($this->absagend);
 		?>
+		<p>
+		Hallo, <?php print $playername; ?>.
+		</p>
+		<p>
 		Das nächste Training ist am <strong><?php print $this->wtag.', '.date('d.m.Y', $this->datum) ?>
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
+		</p>
+		<p>
+		<strong class="zusage">Zusagen (<?php print $anzZu; ?>):</strong><br />
+		<?php
+		if (0 == $anzZu) {
+			print '<em>keine</em>';
+		}
+		foreach($this->zusagend as $z) {
+			print $z;
+		}
+		?>
+		</p>
+		<p>
+		<strong class="absage">Absagen (<?php print $anzAb;?>):</strong><br />
+		<?php
+		if (0 == $anzAb) {
+			print '<em>keine</em>';
+		}
+		foreach($this->absagend as $a) {
+			print $a;
+		}
+		?>
+		</p>
+		<p>
+		<strong class="nixgesagt">Nichtssagend:</strong><br />
+		<?php
+		if (0 == count($this->nixsagend)) {
+			print '<em>niemand</em>';
+		}
+		foreach($this->nixsagend as $n) {
+			print $n;
+		}
+		?>
+		</p>
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
-		<em>(Fehler: practice_id in Datenbank ist falsche Zeitzone)</em>
 		<?php
 		print '<p>'
 				.'<h3>Kommende Trainings ('.count(self::$next).')</h3>';
 		$this->displayUpcomingList();
 		print '</p>';
 	}
+
 	function displayUpcomingList() {
 		// information about the practice
 		// TODO: and NOT about the upcoming one
@@ -272,7 +314,7 @@ class Practice {
 		print '<ul>';
 		foreach(self::$next as $p) {
 			$wtag = $p->wtag;
-			$datum = date('d.m.Y', $p->datum);
+			$datum = date('d.m.', $p->datum);
 			list($begin, $end) = explode(' - ', $p->zeit);
 			$ort = $p->ort;
 			$plink_id = preg_replace('/[^0-9]/', '', $p->practice_id);
@@ -284,13 +326,22 @@ class Practice {
 			// information about the players
 			// ...
 
+			$duClass = '';
+			if ('ja' == $p->userStatus) {
+				$duClass = ' class="zusage"';
+			}
+			if ('nein' == $p->userStatus) {
+				$duClass = ' class="absage"';
+			}
 			?>
-			<li>Training am <strong><?php print $wtag.', '.$datum ?>
-			um <?php print $begin; ?> Uhr</strong>
+			<li><strong><?php print $wtag.', '.$datum ?>, <?php print $begin; ?> Uhr</strong>
 			im <?php print $ort; ?>
-			<a href="<?php print $view_link; ?>">Ansehen</a>
-			| <a href="<?php print $yes_link; ?>">Zusagen</a>
-			| <a href="<?php print $no_link; ?>">Absagen</a>
+			[Alle: <strong class="zusage">+13</strong>
+			| Du: <span<?php print $duClass; ?>><?php print $p->userStatus; ?></span>]
+			[Aktionen:
+			<a class="zusage" href="<?php print $yes_link; ?>">Zusagen</a>
+			| <a class="absage" href="<?php print $no_link; ?>">Absagen</a>
+			| <a href="<?php print $view_link; ?>">Ansehen</a>]
 			(<?php print $plink_id; ?>)</li>
 			<?php
 		}
