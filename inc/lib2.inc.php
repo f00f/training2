@@ -24,7 +24,7 @@ function DbQuery($query) {
 
 function html_header() {
 ?>
-<html><head></head><body>
+<html><head><link rel="stylesheet" href="./css/training.css" type="text/css" /></head><body>
 <?php
 }
 
