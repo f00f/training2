@@ -1,0 +1,67 @@
+/*
+ * https://github.com/f00f/training2
+ * copyright (c) f00f 2012+
+ * Stylesheet für die Trainings-Seite
+ */
+a {
+    color:				#6699cc;
+    background-color:	#eef9ff;
+}
+div.colorFrame {
+    color:				#606060;
+    background-color:	#eef9ff;
+    border:				1px solid #c0c0c0;
+}
+.snip {
+    color:				#606060;
+    font-size:			11px;
+    border-left:		2px solid #6699cc;
+    padding-left:		5px;
+    margin-left:		5px;
+}
+.wePlay {
+	color:				#000000;
+	background-color:	#d0e8ff;
+}
+
+span.uwrMenu {
+    color:				#6699cc;
+}
+a.uwrMenu:hover {
+    color:				#6699cc;
+/*
+    border-top:			solid 1px #6699cc;
+    border-right:		solid 1px #6699cc;
+    border-bottom:		solid 1px #6699cc;
+    border-left:		solid 0px #ffffff;
+*/
+    border:				solid 1px #6699cc;
+    background:			#d0e8ff;
+    text-decoration:	none;
+}
+
+
+/*
+.uwrBlueBg {
+    background-color:	#eef9ff;
+}
+*/
+.uwrComment {
+    font-size:			xx-small;
+    padding-left:		10px;
+    vertical-align:		bottom;
+}
+
+/*
+tr.gemeldet,
+tr.gemeldet a {
+	background:			#e0e0e0;
+}
+*/
+
+.zusage {
+	color:				#408040;
+}
+.absage {
+	color:				#804040;
+}
