@@ -18,6 +18,8 @@ if (@ON_TEST_SERVER)
 	$dbPass	= 'yourpass';
 	}
 
+$einteilung_base = 'http://www.';
+
 // settings for data import from version 1
 $importTableV1 = 'training_foo';
 $importClubId = 'foo';

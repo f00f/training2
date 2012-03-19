@@ -45,7 +45,7 @@ mysql_close();
 html_header();
 // display practice
 $p->display();
-$einteilungs_link = '';
+$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $p->zusagend));
 print '<h3>Siehe auch</h3>';
 print '<ul>';
 print '<li><a href="./">Zum aktuellen Training</a> (nur, wenn nicht das aktuelle angezeigt wird)</li>';
