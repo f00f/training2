@@ -23,4 +23,8 @@ $importTableV1 = 'training_foo';
 $importClubId = 'foo';
 // don't change anything below this line
 $table	= 'training2';
+$tables = array(
+	'practices' => 'train_psessions',
+	'replies'   => 'train_replies',
+	);
 ?>

@@ -1,4 +1,75 @@
 <?php
+require_once './inc/lib2.inc.php';
+
+function importV2Data($verbose = false) {
+	importV2Practices($verbose);
+	importV2Replies($verbose);
+	updateV2ReplyCounts($verbose);
+}
+// import practice sessions
+function importV2Practices($verbose = false) {
+	global $table; // V2-table
+	global $tables; // all V3-tables
+	$importTableV2 = $table;
+
+	$sql = "REPLACE INTO `{$tables['practices']}` "
+			."(`club_id`, `practice_id`, `meta`, `count_yes`, `count_no`) "
+			."SELECT `club_id`, `practice_id`, `text`, 0, 0 FROM `{$importTableV2}` WHERE 'RESET' = `name`";
+	$res = DbQuery($sql);
+}
+function importV2Replies($verbose = false) {
+	global $table; // V2-table
+	global $tables; // all V3-tables
+	$importTableV2 = $table;
+
+	// import practice replies
+	$sql = "REPLACE INTO `{$tables['replies']}` "
+			."(`club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host`) "
+			."SELECT `club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host` "
+			."FROM `{$importTableV2}` WHERE 'RESET' != `name`";
+	$res = DbQuery($sql);
+}
+// update count_* field values
+function updateV2ReplyCounts($verbose = false) {
+	global $table; // V2-table
+	global $tables; // all V3-tables
+	$importTableV2 = $table;
+
+	$sql = "SELECT `club_id`, `practice_id` FROM `{$tables['practices']}` ORDER BY `practice_id`";
+	$res_p = DbQuery($sql);
+	while($p = mysql_fetch_assoc($res_p)) {
+		$cid = $p['club_id'];
+		$pid = $p['practice_id'];
+		$sql = "SELECT `name`, `status` FROM `{$importTableV2}` "
+			."WHERE `practice_id` = '{$pid}' AND `club_id` = '{$cid}' "
+			."AND `name` != 'RESET' "
+			."ORDER BY `when` DESC";
+		$res = DbQuery($sql);
+		$count_yes = 0;
+		$count_no = 0;
+		$hatwasgesagt = array();
+		while ($row = mysql_fetch_assoc($res)) {
+			$name = strtolower($row['name']);
+			if (isset($hatwasgesagt[ $name ])) {
+				continue;
+			}
+			if ('ja' == $row['status']) {
+				++$count_yes;
+			}
+			if ('nein' == $row['status']) {
+				++$count_no;
+			}
+			$hatwasgesagt[ $name ] = true;
+		}
+		$sql = "UPDATE `{$tables['practices']}` "
+			. "SET `count_yes` = '{$count_yes}', `count_no` = '{$count_no}' "
+			. "WHERE  `practice_id` = '{$pid}' AND `club_id` = '{$cid}'";
+		$res = DbQuery($sql);
+	}
+}
+
+// FIXME: This is broken, because a page load stores the next few trainings to the DB.
+// Possible fix: imported rows have emtpy `text` field, stored ones not.
 function importV1Data($verbose = false) {
 	global $importClubId, $importTableV1;
 	global $table;
@@ -36,8 +107,13 @@ function importV1Data($verbose = false) {
 		if ($verbose) {
 			print "Fetching next batch of practice sessions.\n";
 		}
-		$sql = "SELECT * FROM `{$importTableV1}` WHERE `when` > '{$latest_session}' ORDER BY `when` ASC LIMIT 50";
-		//print "------\n{$sql}\n\n";
+		$sql = "SELECT * FROM `{$importTableV1}` "
+				. "WHERE `when` > {$latest_session} "
+				. "ORDER BY `when` ASC "
+				. "LIMIT 100";
+		if ($verbose) {
+			print "------\n{$sql}\n\n";
+		}
 		$result = DbQuery($sql);
 		if (!$result) {	die (mysql_error()); }
 		$more = false;
@@ -55,7 +131,7 @@ function importV1Data($verbose = false) {
 			$buffer[] = $row;
 
 			// store lines to DB and update cursor
-			if ('RESET' == $row['name']) {
+			if ('RESET' == $row['name'] /*AND '' == $row['text']*/) {
 				$latest_session = $row['when'];
 				$date = new DateTime("@{$latest_session}");
 				$dtfmt = $date->format('Y-m-d H:i:s');
@@ -84,5 +160,69 @@ function importV1Data($verbose = false) {
 			print "  Latest session: {$latest_session}.\n";
 		}
 	} while ($more);
+}
+
+function createTablesV3() {
+	global $tables;
+	// table for practices (session meta data)
+	$sql = "CREATE TABLE IF NOT EXISTS `{$tables['practices']}` (
+	  `club_id` varchar(6) NOT NULL,
+	  `practice_id` datetime NOT NULL,
+	  `meta` TEXT,
+	  `count_yes` INT,
+	  `count_no` INT,
+	  UNIQUE KEY `namewhen` (`club_id`,`practice_id`),
+	  KEY `club_id` (`club_id`),
+	  KEY `practice_id` (`practice_id`)
+	);";
+	$res = mysql_query($sql);
+	if (mysql_errno()) {
+		die('DB error: '.mysql_error());
+	}
+	// table for replies
+	$sql = "CREATE TABLE IF NOT EXISTS `{$tables['replies']}` (
+	  `club_id` varchar(6) NOT NULL,
+	  `practice_id` datetime NOT NULL,
+	  `name` varchar(30) NOT NULL default '',
+	  `text` text NOT NULL,
+	  `when` int(11) NOT NULL default '0',
+	  `status` varchar(10) NOT NULL default '',
+	  `ip` varchar(15) NOT NULL default '',
+	  `host` varchar(255) NOT NULL default '',
+	  UNIQUE KEY `namewhen` (`name`,`when`),
+	  KEY `club_id` (`club_id`),
+	  KEY `practice_id` (`practice_id`),
+	  KEY `name` (`name`),
+	  KEY `status` (`status`)
+	);";
+	//  `when_dt` datetime NOT NULL,
+	$res = mysql_query($sql);
+	if (mysql_errno()) {
+		die('DB error: '.mysql_error());
+	}
+}
+
+/**
+ * @deprecated
+ */
+function createTablesV2() {
+// `when_dt` is not really required
+/*
+CREATE TABLE IF NOT EXISTS `training2` (
+  `club_id` varchar(6) NOT NULL,
+  `practice_id` datetime NOT NULL,
+  `name` varchar(30) NOT NULL default '',
+  `text` text NOT NULL,
+  `when` int(11) NOT NULL default '0',
+  `when_dt` datetime NOT NULL,
+  `status` varchar(10) NOT NULL default '',
+  `ip` varchar(15) NOT NULL default '',
+  `host` varchar(255) NOT NULL default '',
+  UNIQUE KEY `namewhen` (`name`,`when`),
+  KEY `club_id` (`club_id`),
+  KEY `name` (`name`),
+  KEY `when_dt` (`practice_id`)
+);
+*/
 }
 ?>
