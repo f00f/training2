@@ -8,9 +8,8 @@ function importV2Data($verbose = false) {
 }
 // import practice sessions
 function importV2Practices($verbose = false) {
-	global $table; // V2-table
+	global $importTableV2; // V2-table
 	global $tables; // all V3-tables
-	$importTableV2 = $table;
 
 	$sql = "REPLACE INTO `{$tables['practices']}` "
 			."(`club_id`, `practice_id`, `meta`, `count_yes`, `count_no`) "
@@ -18,9 +17,8 @@ function importV2Practices($verbose = false) {
 	$res = DbQuery($sql);
 }
 function importV2Replies($verbose = false) {
-	global $table; // V2-table
+	global $importTableV2; // V2-table
 	global $tables; // all V3-tables
-	$importTableV2 = $table;
 
 	// import practice replies
 	$sql = "REPLACE INTO `{$tables['replies']}` "
@@ -31,9 +29,8 @@ function importV2Replies($verbose = false) {
 }
 // update count_* field values
 function updateV2ReplyCounts($verbose = false) {
-	global $table; // V2-table
+	global $importTableV2; // V2-table
 	global $tables; // all V3-tables
-	$importTableV2 = $table;
 
 	$sql = "SELECT `club_id`, `practice_id` FROM `{$tables['practices']}` ORDER BY `practice_id`";
 	$res_p = DbQuery($sql);
@@ -72,17 +69,17 @@ function updateV2ReplyCounts($verbose = false) {
 // Possible fix: imported rows have emtpy `text` field, stored ones not.
 function importV1Data($verbose = false) {
 	global $importClubId, $importTableV1;
-	global $table;
+	global $importTableV2;
 
 	// reset db
-	//$sql = "TRUNCATE `{$table}`";
+	//$sql = "TRUNCATE `{$importTableV2}`";
 	//$result = DbQuery($sql);
 
 	if ($verbose) {
 		print "Fetching latest imported practice session from new DB.\n";
 	}
 	$latest_session = 0;
-	$sql = "SELECT MAX(`when`) AS 'LATEST_SESSION' FROM `{$table}`";
+	$sql = "SELECT MAX(`when`) AS 'LATEST_SESSION' FROM `{$importTableV2}`";
 	$result = DbQuery($sql);
 	if (!$result) {	die (mysql_error()); }
 	if (0 < mysql_num_rows($result)) {
@@ -144,7 +141,7 @@ function importV1Data($verbose = false) {
 					}
 					$dt2 = new DateTime("@{$row['when']}");
 					$when_dt = $dt2->format('Y-m-d H:i:s');
-					$sql = "REPLACE INTO `{$table}` "
+					$sql = "REPLACE INTO `{$importTableV2}` "
 							."(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
 							."VALUES "
 							."('{$importClubId}', '".$dtfmt."', '{$row['name']}', '{$row['text']}', {$row['when']}, '{$when_dt}', '{$row['status']}', '{$row['ip']}', '{$row['host']}')";

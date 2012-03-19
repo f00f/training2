@@ -22,7 +22,8 @@ if (@ON_TEST_SERVER)
 $importTableV1 = 'training_foo';
 $importClubId = 'foo';
 // don't change anything below this line
-$table	= 'training2';
+$importTableV2 = 'training2';
+$table	= $importTableV2; //< @deprecated For backward compatibility only
 $tables = array(
 	'practices' => 'train_psessions',
 	'replies'   => 'train_replies',
