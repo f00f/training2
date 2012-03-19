@@ -29,13 +29,13 @@ class Practice {
 	var $nixsagend = array();
 
 	static function isValidID($cid, $pid) {
-		global $table;
+		global $tables;
 
 		if (!preg_match('/^[0-9]{14}$/', $pid)) return false;
 		if ($pid <= 0) return false;
 		$cid = mysql_real_escape_string($cid);
-		$q = "SELECT `practice_id` FROM `{$table}` "
-			."WHERE `practice_id` = '{$pid}' AND `club_id` = '{$cid}' AND `name` = 'RESET'";
+		$q = "SELECT `practice_id` FROM `{$tables['practices']}` "
+			."WHERE `practice_id` = '{$pid}' AND `club_id` = '{$cid}'";
 		$res = DbQuery($q);
 		return (mysql_num_rows($res) > 0);
 	}
@@ -83,7 +83,6 @@ class Practice {
 
 			//	$now = strtotime('+1 hour'); // timezone correction
 			$nowTime = date('H:i');
-			// TODO: check condition
 			while (/*false === $nextTraining AND*/ ++$iter <= 8) { // 8, ok 
 				// TODO: date check for $trainings
 				if (isset($trainingDates[$weekday])
@@ -113,9 +112,11 @@ class Practice {
 						$nextPractice->wtag    = $trainingDates[$weekday]['tag'];
 						$nextPractice->datum   = strtotime('+ '.$daysLeft.'days');
 						$nextPractice->zeit    = $trainingDates[$weekday]['zeit'];
+						list($begin, $end) = explode(' - ', $nextPractice->zeit);
+						$nextPractice->begin   = $begin;
+						$nextPractice->end     = $end;
 						$nextPractice->ort     = $trainingDates[$weekday]['ort'];
 						$nextPractice->anreise = $trainingDates[$weekday]['anreise'];
-						$nextPractice->when    = mktime($ntHour, $ntMin, 0, $ntMon, $ntDay, $ntYear);
 
 						// store object
 						$nextPractice->store();
@@ -133,7 +134,7 @@ class Practice {
 
 	// TODO: add constructor Practice(int)
 	function __construct($cid, $pid = false) {
-		global $table;
+		global $tables;
 
 		$this->club_id = $cid;
 
@@ -143,8 +144,8 @@ class Practice {
 			$now = time();
 			$date = new DateTime("@{$now}");
 			$now = $date->format('Y-m-d H:i:s');
-			$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$table}` "
-				."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$this->club_id}' AND `name` = 'RESET'";
+			$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
+				."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$this->club_id}'";
 			$res = DbQuery($q);
 			if (0 == mysql_num_rows($res)) {
 				die("Err0r (c'tor)!");
@@ -159,11 +160,11 @@ class Practice {
 
 	// assume that $practice_id is a valid ID
 	function loadData() {
-		global $table;
+		global $tables;
 		global $int2Tag;
 
 		// load info about practice
-		$q = "SELECT `text` FROM `{$table}` "
+		$q = "SELECT `meta` FROM `{$tables['practices']}` "
 			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}'";
 		$res = DbQuery($q);
 		if (0 == mysql_num_rows($res)) {
@@ -171,9 +172,8 @@ class Practice {
 			return false;
 		}
 		$row = mysql_fetch_assoc($res);
-		$p = unserialize($row['text']);
+		$p = unserialize($row['meta']);
 		$this->wtag  = $p->wtag;
-		$this->when  = $p->when;
 		$this->datum = $p->datum;
 		$this->ort   = $p->ort;
 		$this->zeit  = $p->zeit;
@@ -189,9 +189,9 @@ class Practice {
 
 	// load info about current user
 	function loadUserStatus() {
-		global $table;
+		global $tables;
 		global $playername;
-		$q = "SELECT `status` FROM `{$table}` "
+		$q = "SELECT `status` FROM `{$tables['replies']}` "
 			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}' "
 			."AND `name` = '{$playername}' "
 			."ORDER BY `when` DESC "
@@ -206,10 +206,9 @@ class Practice {
 
 	// load info about players
 	function loadPlayersDetails() {
-		global $table;
-		$q = "SELECT `name`, `text`, `status` FROM `{$table}` "
+		global $tables;
+		$q = "SELECT `name`, `text`, `status` FROM `{$tables['replies']}` "
 			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}' "
-			."AND `name` != 'RESET' "
 			."ORDER BY `when` DESC";
 		$res = DbQuery($q);
 		$hatwasgesagt = array();
@@ -229,15 +228,15 @@ class Practice {
 	}
 
 	function store() {
-		global $table;
+		global $tables;
 
 		// TODO: zugesagt etc. should not be stored in the DB.
 		//       but maybe their counts!
 		$text = serialize($this);
-		$q = "REPLACE INTO `{$table}` "
-			. "(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
+		$q = "REPLACE INTO `{$tables['practices']}` "
+			. "(`club_id`, `practice_id`, `meta`) "
 			. "VALUES "
-			. "('{$this->club_id}', '{$this->practice_id}', 'RESET', '{$text}', '{$this->when}', '{$this->practice_id}', '', '', '')";
+			. "('{$this->club_id}', '{$this->practice_id}', '{$text}')";
 		mysql_query($q);
 		//if (mysql_error()) { print mysql_error(); }
 	}
