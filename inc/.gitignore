@@ -1,3 +1,4 @@
 dbconf.inc.php
-players_conf.inc.php
-practices_conf.inc.php
+conf_db.inc.php
+conf_players.inc.php
+conf_practices.inc.php
