@@ -7,10 +7,17 @@ a {
     color:				#6699cc;
     background-color:	#eef9ff;
 }
-div.colorFrame {
+body {
+	color:              #404040;
+}
+h3 {
+	color:              #808080;
+}
+div#practice {
     color:				#606060;
     background-color:	#eef9ff;
     border:				1px solid #c0c0c0;
+	padding:            0 1em;
 }
 .snip {
     color:				#606060;

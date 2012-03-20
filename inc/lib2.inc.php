@@ -23,8 +23,12 @@ function DbQuery($query) {
 }
 
 function html_header() {
+	global $club_id;
 ?>
-<html><head><link rel="stylesheet" href="./css/training.css" type="text/css" /></head><body>
+<html>
+<head><link rel="stylesheet" href="./css/training.css" type="text/css" /></head>
+<body>
+<h3><?php print $club_id; ?>::uwr::training</h3>
 <?php
 }
 

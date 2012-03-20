@@ -242,6 +242,7 @@ class Practice {
 	}
 
 	function display() {
+		global $einteilung_base;
 		global $playername;
 
 		// information about the practice
@@ -257,9 +258,8 @@ class Practice {
 		$anzZu = count($this->zusagend);
 		$anzAb = count($this->absagend);
 		?>
-		<p>
-		Hallo, <?php print $playername; ?>.
-		</p>
+		<div id="practice">
+		<h2>Hallo, <?php print $playername; ?>.</h2>
 		<p>
 		Das nächste Training ist am <strong><?php print $this->wtag.', '.date('d.m.Y', $this->datum) ?>
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
@@ -297,9 +297,18 @@ class Practice {
 		}
 		?>
 		</p>
+		</div>
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
 		<?php
+		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->zusagend));
+		print '<h3>Links</h3>';
+		print '<ul>';
+		print '<li><a href="'.$einteilungs_link.'">Einteilung ansehen</a> (Link hinzu)</li>';
+		print '<li><a href=".">Aktualisieren</a>: Einfach Seite neu laden</li>';
+		print '<li>Zurück zum <a href="./">aktuellen Training</a> <em>(nur anzeigen, wenn nicht das aktuelle angezeigt wird)</em></li>';
+		print '</ul>';
+
 		print '<p>'
 				.'<h3>Kommende Trainings ('.count(self::$next).')</h3>';
 		$this->displayUpcomingList();
