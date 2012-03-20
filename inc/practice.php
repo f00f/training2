@@ -1,5 +1,6 @@
 <?php
-require_once 'trainingszeiten.inc.php';
+require_once 'conf_practices.inc.php';
+require_once 'player.php';
 
 $tag2Int = array(
 	'Mo' => 1, 'Di' => 2, 'Mi' => 3, 'Do' => 4,
@@ -24,8 +25,12 @@ class Practice {
 	var $ort = '';
 	var $userStatus = '';
 	
-	var $zusagend = array();
-	var $absagend = array();
+	var $positive = array();
+	var $positiveNames = array();
+	var $countPos = 0;
+	var $negative = array();
+	var $negativeNames = array();
+	var $countNeg = 0;
 	var $nixsagend = array();
 
 	static function isValidID($cid, $pid) {
@@ -207,24 +212,34 @@ class Practice {
 	// load info about players
 	function loadPlayersDetails() {
 		global $tables;
+
+		$neutralLc = Player::loadAllPlayers($this->club_id);
+
 		$q = "SELECT `name`, `text`, `status` FROM `{$tables['replies']}` "
 			."WHERE `practice_id` = '{$this->practice_id}' AND `club_id` = '{$this->club_id}' "
 			."ORDER BY `when` DESC";
 		$res = DbQuery($q);
-		$hatwasgesagt = array();
+		$didreply = array();
 		while ($row = mysql_fetch_assoc($res)) {
-			$name = strtolower($row['name']);
-			if (isset($hatwasgesagt[ $name ])) {
+			$nameLc = strtolower($row['name']);
+			if (isset($didreply[ $nameLc ])) {
 				continue;
 			}
 			if ('ja' == $row['status']) {
-				$this->zusagend[] = $row['text'];
+				$this->positive[] = $row['text'];
+				$this->positiveNames[] = $row['name'];
+				++$this->countPos;
 			}
 			if ('nein' == $row['status']) {
-				$this->absagend[] = $row['text'];
+				$this->negative[] = $row['text'];
+				$this->negativeNames[] = $row['name'];
+				++$this->countNeg;
 			}
-			$hatwasgesagt[ $name ] = true;
+			$didreply[ $nameLc ] = true;
+			unset($neutralLc[$nameLc]);
 		}
+		
+		$this->nixsagend = array_values($neutralLc);
 	}
 
 	function store() {
@@ -255,8 +270,6 @@ class Practice {
 
 		// information about the players
 		// ...
-		$anzZu = count($this->zusagend);
-		$anzAb = count($this->absagend);
 		?>
 		<div id="practice">
 		<h2>Hallo, <?php print $playername; ?>.</h2>
@@ -265,43 +278,28 @@ class Practice {
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
 		</p>
 		<p>
-		<strong class="zusage">Zusagen (<?php print $anzZu; ?>):</strong><br />
+		<strong class="zusage">Zusagen (<?php print $this->countPos; ?>):</strong><br />
 		<?php
-		if (0 == $anzZu) {
-			print '<em>keine</em>';
-		}
-		foreach($this->zusagend as $z) {
-			print $z;
-		}
+		print ($this->countPos ? implode('; ', $this->positive) : '<em>keine</em>');
 		?>
 		</p>
 		<p>
-		<strong class="absage">Absagen (<?php print $anzAb;?>):</strong><br />
+		<strong class="absage">Absagen (<?php print $this->countNeg;?>):</strong><br />
 		<?php
-		if (0 == $anzAb) {
-			print '<em>keine</em>';
-		}
-		foreach($this->absagend as $a) {
-			print $a;
-		}
+		print ($this->countNeg ? implode('; ', $this->negative) : '<em>keine</em>');
 		?>
 		</p>
 		<p>
 		<strong class="nixgesagt">Nichtssagend:</strong><br />
 		<?php
-		if (0 == count($this->nixsagend)) {
-			print '<em>niemand</em>';
-		}
-		foreach($this->nixsagend as $n) {
-			print $n;
-		}
+		print implode('; ', $this->nixsagend);
 		?>
 		</p>
 		</div>
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
 		<?php
-		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->zusagend));
+		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positive));
 		print '<h3>Links</h3>';
 		print '<ul>';
 		print '<li><a href="'.$einteilungs_link.'">Einteilung ansehen</a> (Link hinzu)</li>';
