@@ -30,7 +30,7 @@ function html_header() {
 <body>
 <h3><?php print $club_id; ?>::uwr::training</h3>
 <div id="practice">
-	<h2>Hallo, <?php print $playername; ?>.
+	<h2>Hallo, <?php print $playername; ?>.</h2>
 <?php
 }
 
