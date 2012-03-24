@@ -23,18 +23,22 @@ function DbQuery($query) {
 }
 
 function html_header() {
-	global $club_id;
+	global $club_id, $playername;
 ?>
 <html>
 <head><link rel="stylesheet" href="./css/training.css" type="text/css" /></head>
 <body>
 <h3><?php print $club_id; ?>::uwr::training</h3>
+<div id="practice">
+	<h2>Hallo, <?php print $playername; ?>.
 <?php
 }
 
 function html_footer() {
 ?>
-</body></html>
+</div><?php /* /#practice */ ?>
+</body>
+</html>
 <?php
 }
 ?>

@@ -271,8 +271,6 @@ class Practice {
 		// information about the players
 		// ...
 		?>
-		<div id="practice">
-		<h2>Hallo, <?php print $playername; ?>.</h2>
 		<p>
 		Das nächste Training ist am <strong><?php print $this->wtag.', '.date('d.m.Y', $this->datum) ?>
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
@@ -292,14 +290,15 @@ class Practice {
 		<p>
 		<strong class="nixgesagt">Nichtssagend:</strong><br />
 		<?php
-		print implode('; ', $this->nixsagend);
+		print '<span class="player">';
+		print implode('</span>; <span class="player">', $this->nixsagend);
+		print '</span>';
 		?>
 		</p>
-		</div>
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
 		<?php
-		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positive));
+		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positiveNames));
 		print '<h3>Links</h3>';
 		print '<ul>';
 		print '<li><a href="'.$einteilungs_link.'">Einteilung ansehen</a> (Link hinzu)</li>';
