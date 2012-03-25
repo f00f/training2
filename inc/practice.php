@@ -276,6 +276,15 @@ class Practice {
 		um <?php print $this->begin; ?> Uhr</strong> (Beckenzeit)
 		</p>
 		<p>
+			<form id="reply-form" action="." method="get">
+			<input id="player" name="player" value="<?php print $playername; ?>" required="required" onkeyup="updatePlayernames();" />
+			<button class="yep" name="action" value="yes">hell yeah</button>
+			<button class="nope" name="action" value="no">nope</button><br />
+			<small>Name (Grund)*</small>
+			<?php $this->displayUpcomingList(); ?>
+			</form>
+		</p>
+		<p>
 		<strong class="zusage">Zusagen (<?php print $this->countPos; ?>):</strong><br />
 		<?php
 		print ($this->countPos ? implode('; ', $this->positive) : '<em>keine</em>');
@@ -305,18 +314,18 @@ class Practice {
 		print '<li><a href=".">Aktualisieren</a>: Einfach Seite neu laden</li>';
 		print '<li>Zurück zum <a href="./">aktuellen Training</a> <em>(nur anzeigen, wenn nicht das aktuelle angezeigt wird)</em></li>';
 		print '</ul>';
-
-		print '<p>'
-				.'<h3>Kommende Trainings ('.count(self::$next).')</h3>';
-		$this->displayUpcomingList();
-		print '</p>';
 	}
 
 	function displayUpcomingList() {
 		// information about the practice
 		// TODO: and NOT about the upcoming one
 		//       (this might coincide, but doesn't have to)
-		print '<ul>';
+		print '<table class="upcoming" cellspacing="0">';
+		print '<tr>'
+				.'<th>Kommende Trainings ('. count(self::$next) .')</th>'
+				.'<th><span class="playername">Aktionen:</span></th>'
+				.'<th>Zus. / Du</th>'
+				.'</tr>';
 		foreach(self::$next as $p) {
 			$wtag = $p->wtag;
 			$datum = date('d.m.', $p->datum);
@@ -339,18 +348,17 @@ class Practice {
 				$duClass = ' class="absage"';
 			}
 			?>
-			<li><strong><?php print $wtag.', '.$datum ?>, <?php print $begin; ?> Uhr</strong>
-			im <?php print $ort; ?>
-			[Alle: <strong class="zusage">+13</strong>
-			| Du: <span<?php print $duClass; ?>><?php print $p->userStatus; ?></span>]
-			[Aktionen:
-			<a class="zusage" href="<?php print $yes_link; ?>">Zusagen</a>
-			| <a class="absage" href="<?php print $no_link; ?>">Absagen</a>
-			| <a href="<?php print $view_link; ?>">Ansehen</a>]
-			(<?php print $plink_id; ?>)</li>
+			<tr>
+			<td align="right"><a href="<?php print $view_link; ?>"><?php print $wtag.' '.$datum ?>, <?php print $begin; ?> Uhr</a>,
+			<?php print $ort; ?></td>
+			<td><button class="yep" href="<?php print $yes_link; ?>">Zus.</button>
+			<button class="nope" href="<?php print $no_link; ?>">Abs.</button></td>
+			<td><strong class="zusage"><?php print $p->countPos; ?></strong>
+			/ <span<?php print $duClass; ?>><?php print $p->userStatus; ?></span></td>
+			</tr>
 			<?php
 		}
-		print '</ul>';
+		print '</table>';
 	}
 }
 ?>
