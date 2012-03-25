@@ -25,7 +25,7 @@ if ($importV2) {
 }
 
 // find next practice and enter into DB.
-$nP = Practice::findNext($club_id);
+$nP = Practice::findUpcoming($club_id);
 
 // decide which practice to display
 $pid = 0;

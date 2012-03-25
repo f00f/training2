@@ -64,9 +64,7 @@ class Player {
 			$player = $playername;
 		}
 		if (0 === $pid) {
-			// TODO: find next pid
-			// min(pid) where pid > now
-			$pid = '20120326200000';
+			$pid = Practice::getIdOfNextPractice();
 		}
 		// TODO: create practice record in db, if not present
 

@@ -69,7 +69,7 @@ class Practice {
 	}
 
 	// find list of practices for next week
-	static function findNext($cid) {
+	static function findUpcoming($cid) {
 		if (! self::$next) {
 			global $tag2Int;
 
@@ -135,6 +135,12 @@ class Practice {
 		}
 
 		return self::$next[0];
+	}
+
+	static function getIdOfNextPractice() {
+		// TODO: find next pid
+		// min(pid) where pid > now
+		return '20120326200000';
 	}
 
 	// TODO: add constructor Practice(int)
