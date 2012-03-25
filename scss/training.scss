@@ -105,6 +105,8 @@ tr.gemeldet a {
 }
 
 button {
+	border-radius: 8px;
+
 	&.yep {
 		background-color: $zusage;
 		color: white;
