@@ -37,6 +37,12 @@ function html_header() {
 function html_footer() {
 ?>
 </div><?php /* /#practice */ ?>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="./js/training.js"></script>
+<script type="text/javascript">
+jQuery(updatePlayernames());
+/* TODO: attach handler to .player onclick */
+</script>
 </body>
 </html>
 <?php
