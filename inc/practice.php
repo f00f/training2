@@ -288,9 +288,9 @@ class Practice {
 		<strong class="zusage">Zusagen (<?php print $this->countPos; ?>):</strong><br />
 		<?php
 		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positiveNames));
-		print ($this->countPos ? implode('; ', $this->positive) : '<em>keine</em>')
-			. '<br />'
-			. '<a href="'.$einteilungs_link.'">Autom. Einteilung ansehen</a>';
+		print ($this->countPos ? implode('; ', $this->positive) . '<br />'
+				. '<a href="'.$einteilungs_link.'">Autom. Einteilung ansehen</a>'
+			: '<em>keine</em>');
 		?>
 		</p>
 		<p>
