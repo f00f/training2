@@ -26,6 +26,15 @@ function importV2Replies($verbose = false) {
 			."SELECT `club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host` "
 			."FROM `{$importTableV2}` WHERE 'RESET' != `name`";
 	$res = DbQuery($sql);
+	// convert practice replies
+	$sql = "UPDATE `{$tables['replies']}` "
+			."SET `status` = 'yes' "
+			."WHERE `status` = 'ja' ";
+	$res = DbQuery($sql);
+	$sql = "UPDATE `{$tables['replies']}` "
+			."SET `status` = 'no' "
+			."WHERE `status` = 'nein' ";
+	$res = DbQuery($sql);
 }
 // update count_* field values
 function updateV2ReplyCounts($verbose = false) {
