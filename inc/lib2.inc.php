@@ -6,6 +6,8 @@ define('SECONDS_PER_DAY', 86400);
 
 require_once './inc/practice.php';
 
+// ENVIRONMENT & MISC
+
 if (!defined('ON_TEST_SERVER')) {
 	if (!defined(@$_SERVER['HTTP_HOST'])) {
 		define('ON_TEST_SERVER', true);
@@ -14,6 +16,25 @@ if (!defined('ON_TEST_SERVER')) {
 	}
 }
 
+function GetAction() {
+	$action = strtolower(@$_REQUEST['action']);
+	if ('yes' == $action || 'no' == $action) {
+		return $action;
+	}
+	return false;
+}
+
+function FirstWord($p_text) {
+	$matches = array();
+	if (preg_match('/^(.*?)[^A-Za-z0-9äöüßÄÖÜ]/', $p_text, $matches)) {
+		return $matches[1];
+	} else {
+		return $p_text;
+	}
+}
+
+// DATABASE
+
 function DbQuery($query) {
 	$result	= mysql_query($query);
 	if (mysql_errno() != 0) {
@@ -21,6 +42,8 @@ function DbQuery($query) {
 	}
 	return $result;
 }
+
+// VIEW
 
 function html_header() {
 	global $club_id, $playername;

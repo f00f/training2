@@ -36,6 +36,12 @@ if (@$_REQUEST['p']) {
 	}
 }
 
+$action = GetAction();
+$player = @$_REQUEST['player'];
+if ($action) {
+	Player::store_reply($action, $player, $club_id, $pid);
+}
+
 $p = new Practice($club_id, $pid);
 $p->loadPlayersDetails();
 

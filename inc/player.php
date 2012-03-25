@@ -47,5 +47,36 @@ class Player {
 
 		return self::$allPlayers;
 	}
+
+	static function store_reply($reply, $player, $cid, $pid) {
+		global $tables;
+		global $playername;
+
+		$name = FirstWord($player);
+		$when = time();
+		$ip = $_SERVER['REMOTE_ADDR'];
+		$host = gethostbyaddr($ip);
+
+		if (!$player) {
+			$player = $playername;
+		}
+		if ('me' === $player) {
+			$player = $playername;
+		}
+		if (0 === $pid) {
+			// TODO: find next pid
+			// min(pid) where pid > now
+			$pid = '20120326200000';
+		}
+		// TODO: create practice record in db, if not present
+
+		$q = "INSERT INTO `{$tables['replies']}` "
+			."(`club_id`, `practice_id`, `name`, `text`, `when`, `status`, `ip`, `host`) "
+			."VALUES "
+			."('{$cid}', '{$pid}', '{$name}', '{$player}', {$when}, '{$reply}', '{$ip}', '{$host}')";
+		DbQuery($q);
+
+		// TODO: update practice record
+	}
 }
 ?>

@@ -225,12 +225,12 @@ class Practice {
 			if (isset($didreply[ $nameLc ])) {
 				continue;
 			}
-			if ('ja' == $row['status']) {
+			if ('yes' == $row['status']) {
 				$this->positive[] = $row['text'];
 				$this->positiveNames[] = $row['name'];
 				++$this->countPos;
 			}
-			if ('nein' == $row['status']) {
+			if ('no' == $row['status']) {
 				$this->negative[] = $row['text'];
 				$this->negativeNames[] = $row['name'];
 				++$this->countNeg;
@@ -337,18 +337,18 @@ class Practice {
 			// ...
 
 			$duClass = '';
-			if ('ja' == $p->userStatus) {
+			if ('yes' == $p->userStatus) {
 				$duClass = ' class="zusage"';
 			}
-			if ('nein' == $p->userStatus) {
+			if ('no' == $p->userStatus) {
 				$duClass = ' class="absage"';
 			}
 			?>
 			<tr>
 			<td align="right"><a href="<?php print $view_link; ?>"><?php print $wtag.' '.$datum ?>, <?php print $begin; ?> Uhr</a>,
 			<?php print $ort; ?></td>
-			<td><button class="yep" href="<?php print $yes_link; ?>">Zus.</button>
-			<button class="nope" href="<?php print $no_link; ?>">Abs.</button></td>
+			<td><button class="yep" name="action" value="yes">Zus.</button>
+			<button class="nope" name="action" value="no">Abs.</button></td>
 			<td><strong class="zusage"><?php print $p->countPos; ?></strong>
 			/ <span<?php print $duClass; ?>><?php print $p->userStatus; ?></span></td>
 			</tr>
