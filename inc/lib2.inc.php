@@ -35,7 +35,17 @@ function html_header() {
 }
 
 function html_footer() {
+	global $pid;
 ?>
+	<h3>Links</h3>
+	<ul>
+	<li><a href="<?php print 'http' . (443 == $_SERVER['SERVER_PORT'] ? 's' : '') .'://'. $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">Aktualisieren</a>: Einfach Seite neu laden</li>
+	<?php
+	if ($pid) {
+		print '<li>Zurück zum <a href="./">aktuellen Training</a></li>';
+	}
+	?>
+	</ul>
 </div><?php /* /#practice */ ?>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="./js/training.js"></script>
