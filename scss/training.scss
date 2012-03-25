@@ -1,0 +1,108 @@
+/*
+ * https://github.com/f00f/training2
+ * copyright (c) f00f 2012+
+ * Stylesheet fuer die Trainings-Seite
+ */
+$zusage : #40a040;
+$absage : #a04040;
+$bordercolor : #c0c0c0;
+a {
+    color:				#6699cc;
+    background-color:	#eef9ff;
+}
+body {
+	color:              #404040;
+}
+h3 {
+	color:              #808080;
+}
+div#practice {
+    color:				#606060;
+    background-color:	#eef9ff;
+    border:				1px solid #c0c0c0;
+	padding:            0 1em;
+}
+.snip {
+    color:				#606060;
+    font-size:			11px;
+    border-left:		2px solid #6699cc;
+    padding-left:		5px;
+    margin-left:		5px;
+}
+.wePlay {
+	color:				#000000;
+	background-color:	#d0e8ff;
+}
+
+span.uwrMenu {
+    color:				#6699cc;
+}
+a.uwrMenu:hover {
+    color:				#6699cc;
+/*
+    border-top:			solid 1px #6699cc;
+    border-right:		solid 1px #6699cc;
+    border-bottom:		solid 1px #6699cc;
+    border-left:		solid 0px #ffffff;
+*/
+    border:				solid 1px #6699cc;
+    background:			#d0e8ff;
+    text-decoration:	none;
+}
+
+
+/*
+.uwrBlueBg {
+    background-color:	#eef9ff;
+}
+*/
+.uwrComment {
+    font-size:			xx-small;
+    padding-left:		10px;
+    vertical-align:		bottom;
+}
+
+/*
+tr.gemeldet,
+tr.gemeldet a {
+	background:			#e0e0e0;
+}
+*/
+
+.zusage {
+	color:				$zusage;
+}
+.absage {
+	color:				$absage;
+}
+
+.upcoming {
+	th, td {
+		border-left: 1px solid $bordercolor;
+		padding: 0 5px;
+	}
+
+	th {
+		border-bottom: 1px solid $bordercolor;
+		&:first-child {
+			border-left: none;
+		}
+	}
+
+	button, td {
+		font-size: 90%;
+	}
+
+	td:first-child {
+		border-left: none;
+	}
+}
+
+button {
+	&.yep {
+		background-color: $zusage;
+	}
+	&.nope {
+		background-color: $absage;
+	}
+}
