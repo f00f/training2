@@ -287,7 +287,10 @@ class Practice {
 		<p>
 		<strong class="zusage">Zusagen (<?php print $this->countPos; ?>):</strong><br />
 		<?php
-		print ($this->countPos ? implode('; ', $this->positive) : '<em>keine</em>');
+		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positiveNames));
+		print ($this->countPos ? implode('; ', $this->positive) : '<em>keine</em>')
+			. '<br />'
+			. '<a href="'.$einteilungs_link.'">Autom. Einteilung ansehen</a>';
 		?>
 		</p>
 		<p>
@@ -307,10 +310,8 @@ class Practice {
 		<hr />
 		<a href="<?php print $plink; ?>">Permalink</a> (<?php print $plink_id; ?>)<br />
 		<?php
-		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positiveNames));
 		print '<h3>Links</h3>';
 		print '<ul>';
-		print '<li><a href="'.$einteilungs_link.'">Einteilung ansehen</a> (Link hinzu)</li>';
 		print '<li><a href=".">Aktualisieren</a>: Einfach Seite neu laden</li>';
 		print '<li>Zurück zum <a href="./">aktuellen Training</a> <em>(nur anzeigen, wenn nicht das aktuelle angezeigt wird)</em></li>';
 		print '</ul>';
