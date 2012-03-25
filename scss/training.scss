@@ -3,15 +3,16 @@
  * copyright (c) f00f 2012+
  * Stylesheet fuer die Trainings-Seite
  */
-$zusage : #40a040;
-$absage : #a04040;
+$zusage : #30a030;
+$absage : #a02020;
 $bordercolor : #c0c0c0;
+$textcolor : #404040;
 a {
     color:				#6699cc;
     background-color:	#eef9ff;
 }
 body {
-	color:              #404040;
+	color:              $textcolor;
 }
 h3 {
 	color:              #808080;
@@ -77,20 +78,25 @@ tr.gemeldet a {
 }
 
 .upcoming {
-	th, td {
+	td, th {
 		border-left: 1px solid $bordercolor;
 		padding: 0 5px;
+		color: $textcolor;
 	}
 
 	th {
+		font-weight: normal;
+		font-style: italic;
+		font-size: 90%;
 		border-bottom: 1px solid $bordercolor;
+
 		&:first-child {
 			border-left: none;
 		}
 	}
 
 	button, td {
-		font-size: 90%;
+		font-size: 80%;
 	}
 
 	td:first-child {
@@ -101,8 +107,10 @@ tr.gemeldet a {
 button {
 	&.yep {
 		background-color: $zusage;
+		color: white;
 	}
 	&.nope {
 		background-color: $absage;
+		color: white;
 	}
 }

@@ -62,24 +62,30 @@ tr.gemeldet a {
 }
 */
 .zusage {
-  color: #40a040; }
+  color: #30a030; }
 
 .absage {
-  color: #a04040; }
+  color: #a02020; }
 
-.upcoming th, .upcoming td {
+.upcoming td, .upcoming th {
   border-left: 1px solid silver;
-  padding: 0 5px; }
+  padding: 0 5px;
+  color: #404040; }
 .upcoming th {
+  font-weight: normal;
+  font-style: italic;
+  font-size: 90%;
   border-bottom: 1px solid silver; }
   .upcoming th:first-child {
     border-left: none; }
 .upcoming button, .upcoming td {
-  font-size: 90%; }
+  font-size: 80%; }
 .upcoming td:first-child {
   border-left: none; }
 
 button.yep {
-  background-color: #40a040; }
+  background-color: #30a030;
+  color: white; }
 button.nope {
-  background-color: #a04040; }
+  background-color: #a02020;
+  color: white; }
