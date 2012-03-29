@@ -26,3 +26,23 @@ function updatePlayernames() {
 		// TODO: update links (with ``name'')
 	});
 }
+function InstallPlayerHandlers() {
+	var players = jQuery('span.player');
+	for (var i=0, span=null; i<players.length; i++) {
+		span = players[i];
+		if (1 != span.nodeType)
+			{ continue; }
+		span.onclick = PlayerItemOnClickHandler;
+	}
+}
+function PlayerItemOnClickHandler(evt) {
+	var obj = (!evt) ? window.event.srcElement : evt.target;
+	gComboInput.val(obj.innerHTML);
+	// IE Bug: move cursor to the end
+	if (gComboInput.createTextRange) {
+		var tr = gComboInput.createTextRange();
+		tr.collapse(false);
+		tr.select();
+	}
+	gComboInput.focus();
+}

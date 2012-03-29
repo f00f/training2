@@ -91,3 +91,6 @@ button {
   button.nope {
     background-color: #a02020;
     color: white; }
+
+span.player {
+  cursor: pointer; }
