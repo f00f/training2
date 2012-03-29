@@ -64,7 +64,7 @@ class Player {
 			$player = $playername;
 		}
 		if (0 === $pid) {
-			$pid = Practice::getIdOfNextPractice();
+			$pid = Practice::getIdOfNextPractice($cid);
 		}
 		// TODO: create practice record in db, if not present
 

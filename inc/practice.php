@@ -137,10 +137,20 @@ class Practice {
 		return self::$next[0];
 	}
 
-	static function getIdOfNextPractice() {
-		// TODO: find next pid
-		// min(pid) where pid > now
-		return '20120326200000';
+	static function getIdOfNextPractice($club_id) {
+		global $tables;
+
+		$now = time();
+		$date = new DateTime("@{$now}");
+		$now = $date->format('Y-m-d H:i:s');
+		$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
+			."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$club_id}'";
+		$res = DbQuery($q);
+		if (0 == mysql_num_rows($res)) {
+			die("Err0r (c'tor)!");
+		}
+		$row = mysql_fetch_assoc($res);
+		return $row['pid'];
 	}
 
 	// TODO: add constructor Practice(int)
@@ -152,17 +162,7 @@ class Practice {
 		if (!$pid) {
 			// find next training p_id
 			// find max PID in DB which is smaller than time() - 120 Min
-			$now = time();
-			$date = new DateTime("@{$now}");
-			$now = $date->format('Y-m-d H:i:s');
-			$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
-				."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$this->club_id}'";
-			$res = DbQuery($q);
-			if (0 == mysql_num_rows($res)) {
-				die("Err0r (c'tor)!");
-			}
-			$row = mysql_fetch_assoc($res);
-			$pid = $row['pid'];
+			$pid = self::getIdOfNextPractice($this->club_id);
 		}
 
 		$this->practice_id = $pid;
