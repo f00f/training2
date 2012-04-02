@@ -140,9 +140,15 @@ class Practice {
 	static function getIdOfNextPractice($club_id) {
 		global $tables;
 
-		$now = time();
+		$now = time() - 2*3600; // offset for overlap
+		$dtzEB  = new DateTimeZone('Europe/Berlin');
+
 		$date = new DateTime("@{$now}");
+		$date->setTimezone($dtzEB);
 		$now = $date->format('Y-m-d H:i:s');
+
+		// for some reasons (maybe the MIN?), this query returns timezone-adjusted values.
+		// since we don't use timezones, we have to reverse this adjustment later.
 		$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
 			."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$club_id}'";
 		$res = DbQuery($q);
@@ -150,7 +156,14 @@ class Practice {
 			die("Err0r (c'tor)!");
 		}
 		$row = mysql_fetch_assoc($res);
-		return $row['pid'];
+
+		// reverse mysql's timzeone adjustment
+		$tzOff = $dtzEB->getOffset($date);
+		$date = new DateTime("{$row['pid']}");
+		$date->modify("+ {$tzOff} sec");
+		$pid = $date->format('Y-m-d H:i:s');
+
+		return $pid;
 	}
 
 	// TODO: add constructor Practice(int)
