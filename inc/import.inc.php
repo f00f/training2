@@ -90,13 +90,15 @@ function importV1Data($verbose = false) {
 	$latest_session = 0;
 	$sql = "SELECT MAX(`when`) AS 'LATEST_SESSION' FROM `{$importTableV2}`";
 	$result = DbQuery($sql);
-	if (!$result) {	die (mysql_error()); }
 	if (0 < mysql_num_rows($result)) {
 		$row = mysql_fetch_assoc($result);
 		$latest_session = $row['LATEST_SESSION'];
 	}
 	if ($verbose) {
 		print "  Latest session: {$latest_session}.\n";
+	}
+	if (!$latest_session) {
+		$latest_session = 0;
 	}
 	//$date = new DateTime("{$latest_session}");
 	//$latest_session = $date->format('U');
@@ -108,7 +110,7 @@ function importV1Data($verbose = false) {
 	$i = 0;
 
 	do {
-		if ($i++ > 2) break;
+		if ($i++ > 100) break;
 
 		if ($verbose) {
 			print "Fetching next batch of practice sessions.\n";
@@ -116,12 +118,11 @@ function importV1Data($verbose = false) {
 		$sql = "SELECT * FROM `{$importTableV1}` "
 				. "WHERE `when` > {$latest_session} "
 				. "ORDER BY `when` ASC "
-				. "LIMIT 100";
+				. "LIMIT 70";
 		if ($verbose) {
 			print "------\n{$sql}\n\n";
 		}
 		$result = DbQuery($sql);
-		if (!$result) {	die (mysql_error()); }
 		$more = false;
 		$current_session = 0;
 		if (0 < mysql_num_rows($result)) {
@@ -153,7 +154,7 @@ function importV1Data($verbose = false) {
 					$sql = "REPLACE INTO `{$importTableV2}` "
 							."(`club_id`, `practice_id`, `name`, `text`, `when`, `when_dt`, `status`, `ip`, `host`) "
 							."VALUES "
-							."('{$importClubId}', '".$dtfmt."', '{$row['name']}', '{$row['text']}', {$row['when']}, '{$when_dt}', '{$row['status']}', '{$row['ip']}', '{$row['host']}')";
+							."('{$importClubId}', '".$dtfmt."', '{$row['name']}', '".mysql_real_escape_string($row['text'])."', {$row['when']}, '{$when_dt}', '{$row['status']}', '{$row['ip']}', '{$row['host']}')";
 					//print "------\n{$sql}\n\n";
 					$result = DbQuery($sql);
 				}
@@ -182,14 +183,11 @@ function createTablesV3() {
 	  KEY `practice_id` (`practice_id`)
 	);";
 	$res = mysql_query($sql);
-	if (mysql_errno()) {
-		die('DB error: '.mysql_error());
-	}
 	// table for replies
 	$sql = "CREATE TABLE IF NOT EXISTS `{$tables['replies']}` (
 	  `club_id` varchar(6) NOT NULL,
 	  `practice_id` datetime NOT NULL,
-	  `name` varchar(30) NOT NULL default '',
+	  `name` varchar(50) NOT NULL default '',
 	  `text` text NOT NULL,
 	  `when` int(11) NOT NULL default '0',
 	  `status` varchar(10) NOT NULL default '',
@@ -203,9 +201,6 @@ function createTablesV3() {
 	);";
 	//  `when_dt` datetime NOT NULL,
 	$res = mysql_query($sql);
-	if (mysql_errno()) {
-		die('DB error: '.mysql_error());
-	}
 }
 
 /**
@@ -217,7 +212,7 @@ function createTablesV2() {
 CREATE TABLE IF NOT EXISTS `training2` (
   `club_id` varchar(6) NOT NULL,
   `practice_id` datetime NOT NULL,
-  `name` varchar(30) NOT NULL default '',
+  `name` varchar(50) NOT NULL default '',
   `text` text NOT NULL,
   `when` int(11) NOT NULL default '0',
   `when_dt` datetime NOT NULL,

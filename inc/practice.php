@@ -183,6 +183,9 @@ class Practice {
 			return false;
 		}
 		$row = mysql_fetch_assoc($res);
+		if (!$row['meta']) {
+			return false;
+		}
 		$p = unserialize($row['meta']);
 		$this->wtag  = $p->wtag;
 		$this->datum = $p->datum;
