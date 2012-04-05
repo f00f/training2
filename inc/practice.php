@@ -13,7 +13,8 @@ $int2Tag = array(
 
 class Practice {
 	static $next = false;
-	static $trainings = array();
+	static $nextPid = false; //< don't serialize
+	static $trainings = array(); //< serialize?
 	
 	var $club_id = '';
 	var $practice_id = 0;
@@ -23,15 +24,15 @@ class Practice {
 	var $begin = '';
 	var $end = '';
 	var $ort = '';
-	var $userStatus = '';
+	var $userStatus = ''; //< serialize?
 	
-	var $positive = array();
-	var $positiveNames = array();
+	var $positive = array(); //< don't serialize
+	var $positiveNames = array(); //< don't serialize
 	var $countPos = 0;
-	var $negative = array();
-	var $negativeNames = array();
+	var $negative = array(); //< don't serialize
+	var $negativeNames = array(); //< don't serialize
 	var $countNeg = 0;
-	var $nixsagend = array();
+	var $nixsagend = array(); //< don't serialize
 
 	static function isValidID($cid, $pid) {
 		global $tables;
@@ -138,24 +139,27 @@ class Practice {
 	}
 
 	static function getIdOfNextPractice($club_id) {
-		global $tables;
+		if (!self::$nextPid) {
+			global $tables;
 
-		$now = time() - 2*3600; // offset for overlap
-		$dtzEB  = new DateTimeZone('Europe/Berlin');
+			$now = time() - 2*3600; // offset for overlap
+			//$dtzEB  = new DateTimeZone('Europe/Berlin');
 
-		$date = new DateTime("@{$now}");
-		$date->setTimezone($dtzEB);
-		$now = $date->format('Y-m-d H:i:s');
+			$date = new DateTime("@{$now}");
+			//$date->setTimezone($dtzEB);
+			$now = $date->format('Y-m-d H:i:s');
 
-		$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
-			."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$club_id}'";
-		$res = DbQuery($q);
-		if (0 == mysql_num_rows($res)) {
-			die("Err0r (c'tor)!");
+			$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
+				."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$club_id}'";
+			$res = DbQuery($q);
+			if (0 == mysql_num_rows($res)) {
+				die("Err0r (c'tor)!");
+			}
+			$row = mysql_fetch_assoc($res);
+
+			self::$nextPid = $row['pid'];
 		}
-		$row = mysql_fetch_assoc($res);
-
-		return $row['pid'];
+		return self::$nextPid;
 	}
 
 	// TODO: add constructor Practice(int)
@@ -256,18 +260,19 @@ class Practice {
 		$this->nixsagend = array_values($neutralLc);
 	}
 
+	/** Stores (meta) information about the practice session.
+	*/
 	function store() {
 		global $tables;
 
-		// TODO: zugesagt etc. should not be stored in the DB.
-		//       but maybe their counts!
+		// TODO: the arrays positive, negative, etc. should not be stored in the DB.
+		//       but probably countPos and countNeg!
 		$text = serialize($this);
 		$q = "REPLACE INTO `{$tables['practices']}` "
 			. "(`club_id`, `practice_id`, `meta`) "
 			. "VALUES "
 			. "('{$this->club_id}', '{$this->practice_id}', '{$text}')";
-		mysql_query($q);
-		//if (mysql_error()) { print mysql_error(); }
+		DbQuery($q);
 	}
 
 	function display() {
