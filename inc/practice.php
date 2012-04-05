@@ -147,8 +147,6 @@ class Practice {
 		$date->setTimezone($dtzEB);
 		$now = $date->format('Y-m-d H:i:s');
 
-		// for some reasons (maybe the MIN?), this query returns timezone-adjusted values.
-		// since we don't use timezones, we have to reverse this adjustment later.
 		$q = "SELECT MIN(`practice_id`) AS `pid` FROM `{$tables['practices']}` "
 			."WHERE `practice_id` >= '{$now}' AND `club_id` = '{$club_id}'";
 		$res = DbQuery($q);
@@ -157,13 +155,7 @@ class Practice {
 		}
 		$row = mysql_fetch_assoc($res);
 
-		// reverse mysql's timzeone adjustment
-		$tzOff = $dtzEB->getOffset($date);
-		$date = new DateTime("{$row['pid']}");
-		$date->modify("+ {$tzOff} sec");
-		$pid = $date->format('Y-m-d H:i:s');
-
-		return $pid;
+		return $row['pid'];
 	}
 
 	// TODO: add constructor Practice(int)
