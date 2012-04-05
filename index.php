@@ -12,6 +12,7 @@ $importV2 = false;
 # connect to db
 mysql_connect($dbHost, $dbUser, $dbPass);
 mysql_select_db($dbDB);
+mysql_set_charset('utf8');
 
 if ($importV1) {
 // import old data from versions 1

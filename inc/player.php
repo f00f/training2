@@ -40,9 +40,12 @@ class Player {
 					if (!$name) {
 						$name = $row['name'];
 					}
-					self::$allPlayers[ strtolower($name) ] = $name;
+					$lcName = mb_strtolower($name, 'utf8');
+					self::$allPlayers[ $lcName ] = $name;
 				}
 			}
+
+			asort(self::$allPlayers);
 		}
 
 		return self::$allPlayers;
