@@ -331,23 +331,26 @@ class Practice {
 		<strong class="zusage">Zusagen (<?php print $this->countPos; ?>):</strong><br />
 		<?php
 		$einteilungs_link = $einteilung_base . '?namen=' . urlencode(implode(',', $this->positiveNames));
-		print ($this->countPos ? implode('; ', $this->positive) . '<br />'
-				. '<a href="'.$einteilungs_link.'">Autom. Einteilung ansehen</a>'
-			: '<em>keine</em>');
+		print ($this->countPos
+				? '<span>' . implode('</span>; <span>', $this->positive) . '</span><br />'
+						. '<a href="'.$einteilungs_link.'">Autom. Einteilung ansehen</a>'
+				: '<em>keine</em>');
 		?>
 		</p>
 		<p>
 		<strong class="absage">Absagen (<?php print $this->countNeg;?>):</strong><br />
 		<?php
-		print ($this->countNeg ? implode('; ', $this->negative) : '<em>keine</em>');
+		print ($this->countNeg
+				? '<span>' . implode('</span>; <span>', $this->negative) . '</span>'
+				: '<em>keine</em>');
 		?>
 		</p>
 		<p>
 		<strong class="nixgesagt">Nichtssagend:</strong><br />
 		<?php
-		print '<span class="player">';
-		print implode('</span>; <span class="player">', $this->nixsagend);
-		print '</span>';
+		print '<span class="player">'
+			. implode('</span>; <span class="player">', $this->nixsagend)
+			. '</span>';
 		?>
 		</p>
 		<hr />
