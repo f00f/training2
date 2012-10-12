@@ -1,5 +1,5 @@
 <?php
-require_once 'conf_practices.inc.php';
+//require_once 'conf_practices.inc.php';
 require_once 'player.php';
 
 $tag2Int = array(
@@ -69,70 +69,94 @@ class Practice {
 		}
 	}
 
+	// load _all_ practice dates from DB
+	static function loadPracticesDataFromDB($cid) {
+		global $tables;
+
+		# reset configuration from file and use DB instead
+		self::$trainings = array();
+
+		$result = DbQuery("SELECT * FROM `{$tables['practices_conf']}` "
+			. "WHERE `club_id` = '{$cid}'");
+			// TODO: filter valid dates
+
+		if (mysql_num_rows($result) > 0) {
+			while ($row = mysql_fetch_assoc($result)) {
+				$t = unserialize($row['data']);
+				$t['tag']  = $row['dow'];
+				$t['zeit'] = $row['begin']. ' - ' .$row['end'];
+				self::$trainings[] = $t;
+			}
+		}
+	}
+
 	// find list of practices for next week
 	static function findUpcoming($cid) {
-		if (! self::$next) {
-			global $tag2Int;
+		if (self::$next) {
+			return self::$next[0];
+		}
+		global $tag2Int;
 
-			self::$next = array();
-			$trainingDates = array();
+		self::$next = array();
+		$trainingDates = array();
 
-			foreach(self::$trainings as $t) {
-				$wdayIdx = $tag2Int[$t['tag']];
-				$trainingDates[$wdayIdx] = $t;
-			}
+		self::loadPracticesDataFromDB($cid);
 
-			$weekday      = date('w');
-			$daysLeft     = 0;
-			$nextTraining = false;
-			$iter         = 0;
+		foreach(self::$trainings as $t) {
+			$wdayIdx = $tag2Int[$t['tag']];
+			$trainingDates[$wdayIdx] = $t;
+		}
 
-			//	$now = strtotime('+1 hour'); // timezone correction
-			$nowTime = date('H:i');
-			while (/*false === $nextTraining AND*/ ++$iter <= 8) { // 8, ok 
-				// TODO: date check for $trainings
-				if (isset($trainingDates[$weekday])
-					AND ($daysLeft > 0 OR $trainingDates[$weekday]['zeit'] >= $nowTime)) {
-					// TODO: should be a Practice object
-					$nextTraining = array(
-						'wtag'    => $trainingDates[$weekday]['tag'],
-						'datum'   => strtotime('+ '.$daysLeft.'days'),
-						'zeit'    => $trainingDates[$weekday]['zeit'],
-						'ort'     => $trainingDates[$weekday]['ort'],
-						'anreise' => $trainingDates[$weekday]['anreise'],
-					);
+		$weekday      = date('w');
+		$daysLeft     = 0;
+		$nextTraining = false;
+		$iter         = 0;
 
-					// correct timestamp
-					list($ntHour, $ntMin) = explode(':', $nextTraining['zeit']);
-					$ntMin = (int) $ntMin; // kludge: cut the tail
-					$ntDay	= date('d', $nextTraining['datum']);
-					$ntMon	= date('m', $nextTraining['datum']);
-					$ntYear	= date('Y', $nextTraining['datum']);
-					$nextTraining['when'] = mktime($ntHour, $ntMin, 0, $ntMon, $ntDay, $ntYear);
+		//	$now = strtotime('+1 hour'); // timezone correction
+		$nowTime = date('H:i');
+		while (/*false === $nextTraining AND*/ ++$iter <= 8) { // 8, ok 
+			// TODO: date check for $trainings
+			if (isset($trainingDates[$weekday])
+				AND ($daysLeft > 0 OR $trainingDates[$weekday]['zeit'] >= $nowTime)) {
+				// TODO: should be a Practice object
+				$nextTraining = array(
+					'wtag'    => $trainingDates[$weekday]['tag'],
+					'datum'   => strtotime('+ '.$daysLeft.'days'),
+					'zeit'    => $trainingDates[$weekday]['zeit'],
+					'ort'     => $trainingDates[$weekday]['ort'],
+					'anreise' => $trainingDates[$weekday]['anreise'],
+				);
 
-					$nextTraining['practice_id'] = date('Y-m-d H:i:s', $nextTraining['when']);
+				// correct timestamp
+				list($ntHour, $ntMin) = explode(':', $nextTraining['zeit']);
+				$ntMin = (int) $ntMin; // kludge: cut the tail
+				$ntDay	= date('d', $nextTraining['datum']);
+				$ntMon	= date('m', $nextTraining['datum']);
+				$ntYear	= date('Y', $nextTraining['datum']);
+				$nextTraining['when'] = mktime($ntHour, $ntMin, 0, $ntMon, $ntDay, $ntYear);
 
-					$nextPractice = new Practice($cid, $nextTraining['practice_id']);
-					if (!$nextPractice->wtag) { // was not in db, yet
-						// fill object
-						$nextPractice->wtag    = $trainingDates[$weekday]['tag'];
-						$nextPractice->datum   = strtotime('+ '.$daysLeft.'days');
-						$nextPractice->zeit    = $trainingDates[$weekday]['zeit'];
-						list($begin, $end) = explode(' - ', $nextPractice->zeit);
-						$nextPractice->begin   = $begin;
-						$nextPractice->end     = $end;
-						$nextPractice->ort     = $trainingDates[$weekday]['ort'];
-						$nextPractice->anreise = $trainingDates[$weekday]['anreise'];
+				$nextTraining['practice_id'] = date('Y-m-d H:i:s', $nextTraining['when']);
 
-						// store object
-						$nextPractice->store();
-					}
+				$nextPractice = new Practice($cid, $nextTraining['practice_id']);
+				if (!$nextPractice->wtag) { // was not in db, yet
+					// fill object
+					$nextPractice->wtag    = $trainingDates[$weekday]['tag'];
+					$nextPractice->datum   = strtotime('+ '.$daysLeft.'days');
+					$nextPractice->zeit    = $trainingDates[$weekday]['zeit'];
+					list($begin, $end) = explode(' - ', $nextPractice->zeit);
+					$nextPractice->begin   = $begin;
+					$nextPractice->end     = $end;
+					$nextPractice->ort     = $trainingDates[$weekday]['ort'];
+					$nextPractice->anreise = $trainingDates[$weekday]['anreise'];
 
-					self::$next[] = $nextPractice;
+					// store object
+					$nextPractice->store();
 				}
-				$weekday = ++$weekday % 7;
-				++$daysLeft;
+
+				self::$next[] = $nextPractice;
 			}
+			$weekday = ++$weekday % 7;
+			++$daysLeft;
 		}
 
 		return self::$next[0];
